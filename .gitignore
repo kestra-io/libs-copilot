@@ -1,0 +1,26 @@
+### Java
+Thumbs.db
+.DS_Store
+.gradle
+.kotlin
+build/
+target/
+out/
+.idea
+.vscode
+prettierrc.js
+*.iml
+*.ipr
+*.iws
+.project
+.settings
+.classpath
+.attach*
+**/*.class
+**/bin/*
+
+### Docker
+/.env
+
+# Allure Reports
+**/allure-results/*
