@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+#      - name: Ensure tag is on main
+#        run: |
+#          git fetch origin main:refs/remotes/origin/main
+#          git merge-base --is-ancestor "${GITHUB_SHA}" "origin/main"
+
+      - name: setup Java
+        uses: kestra-io/actions/composite/setup-build@main
+        with:
+          java-enabled: 'true'
+          java-version: '25'
+
+      - name: GCP - Auth with github service account
+        id: glogin
+        uses: 'google-github-actions/auth@v3'
+        with:
+          token_format: 'access_token'
+          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
+
+      - name: Build package
+        run: |
+          ./gradlew build -x test
+
+      - name: TODO release maven artifact
+        run: |
+          echo "to be done"
+
