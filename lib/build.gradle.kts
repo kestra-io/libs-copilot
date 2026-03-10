@@ -84,6 +84,7 @@ tasks.register("releaseVersion") {
         runGit("add", rootProject.file("gradle.properties").absolutePath)
         runGit("commit", "-m", "chore(version): release $gradleVersion")
         runGit("tag", tagName)
+        runGit("push", "origin", tagName)
     }
 }
 
