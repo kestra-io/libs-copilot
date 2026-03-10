@@ -11,6 +11,7 @@ import org.gradle.api.GradleException
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+    `maven-publish`
     id("com.google.cloud.artifactregistry.gradle-plugin") version "2.2.5"
     id("de.undercouch.download") version "5.7.0"
 }
@@ -113,7 +114,7 @@ repositories {
     }
 }
 
-/*
+
 publishing {
     repositories {
         maven {
@@ -126,4 +127,4 @@ publishing {
             )
         }
     }
-}*/
+}
