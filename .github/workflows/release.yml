@@ -39,7 +39,8 @@ jobs:
         run: |
           ./gradlew build -x test
 
-      - name: TODO release maven artifact
-        run: |
-          echo "to be done"
-
+      - name: Publish java lib to our private registry
+        uses: kestra-io/actions/composite/publish-java@main
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          is-private: true

@@ -16,7 +16,6 @@ plugins {
 }
 
 
-version = "0.0.3"
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
@@ -44,7 +43,6 @@ tasks.named<Test>("test") {
 // release
 val autotagBinDir = layout.buildDirectory.dir("tools")
 val autotagBinary = autotagBinDir.map { it.file("autotag") }
-val nextVersionFile = layout.buildDirectory.file("next-version.txt")
 tasks.register<Exec>("installAutotag") {
     outputs.file(autotagBinary)
     commandLine(
@@ -54,43 +52,22 @@ tasks.register<Exec>("installAutotag") {
 }
 tasks.register<Exec>("calculateNextSemverVersion") {
     dependsOn("installAutotag")
-    notCompatibleWithConfigurationCache("Writes tool output to file at execution time")
-    outputs.file(nextVersionFile)
-    doFirst {
-        nextVersionFile.get().asFile.parentFile.mkdirs()
-        standardOutput = nextVersionFile.get().asFile.outputStream()
-    }
     commandLine(autotagBinary.get().asFile.absolutePath, "-ne", "--scheme=conventional", "--repo=../")
 }
 
-tasks.register("releaseNextVersion") {
-    dependsOn("calculateNextSemverVersion")
+tasks.register("releaseVersion") {
     notCompatibleWithConfigurationCache("Runs git and edits build file")
     doLast {
-        val rawVersion = nextVersionFile.get().asFile.readText().trim()
+        val rawVersion = (findProperty("versionToRelease") as? String)?.trim().orEmpty()
+        if (rawVersion.isEmpty()) {
+            throw GradleException("Missing -PversionToRelease=... value")
+        }
         if (rawVersion.isEmpty()) {
             throw GradleException("calculateNextSemverVersion produced no version output")
         }
 
         val gradleVersion = rawVersion.removePrefix("v")
-        val buildFile = project.buildFile
-        val current = buildFile.readText()
-        val versionRegex = Regex("(?m)^version\\s*=\\s*\"[^\"]+\"\\s*$")
-        val updated = if (versionRegex.containsMatchIn(current)) {
-            current.replace(versionRegex, "version = \"$gradleVersion\"")
-        } else {
-            val pluginsRegex = Regex("(?s)plugins\\s*\\{.*?\\}\\s*")
-            val match = pluginsRegex.find(current)
-            if (match != null) {
-                val insertAt = match.range.last + 1
-                current.substring(0, insertAt) + "\nversion = \"$gradleVersion\"\n\n" + current.substring(insertAt)
-            } else {
-                "version = \"$gradleVersion\"\n\n" + current
-            }
-        }
-        if (updated != current) {
-            buildFile.writeText(updated)
-        }
+        setVersionInProperties(rawVersion)
 
         val tagName = if (rawVersion.startsWith("v")) rawVersion else "v$rawVersion"
         fun runGit(vararg args: String) {
@@ -103,9 +80,24 @@ tasks.register("releaseNextVersion") {
                 throw GradleException("git ${args.joinToString(" ")} failed with exit code $exitCode")
             }
         }
-        runGit("add", buildFile.absolutePath)
-        runGit("commit", "-m", "Bump lib version to $gradleVersion")
+        runGit("add", rootProject.file("gradle.properties").absolutePath)
+        runGit("commit", "-m", "chore(version): release $gradleVersion")
         runGit("tag", tagName)
+    }
+}
+
+fun setVersionInProperties(rawVersion: String) {
+    val newVersion = rawVersion.removePrefix("v")
+    val propertiesFile = rootProject.file("gradle.properties")
+    val current = propertiesFile.readText()
+    val versionRegex = Regex("(?m)^version\\s*=\\s*\"?[^\"\\n]+\"?\\s*$")
+    val updated = if (versionRegex.containsMatchIn(current)) {
+        current.replace(versionRegex, "version = \"$newVersion\"")
+    } else {
+        (current.trimEnd() + "\nversion = \"$newVersion\"\n")
+    }
+    if (updated != current) {
+        propertiesFile.writeText(updated)
     }
 }
 
