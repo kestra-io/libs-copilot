@@ -4,12 +4,18 @@ on:
   push:
     branches:
       - main
-
+    tags-ignore:
+      - '*'
 permissions:
   contents: write
+  actions: read
+  pull-requests: write
+  packages: read
+
 
 jobs:
   tag:
+    if: ${{ github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'chore(release)') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,17 +44,8 @@ jobs:
         run: |
           ./gradlew check
 
-
-# TODO try https://github.com/autotag-dev/autotag instead
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install semantic-release
-        run: npm install -g semantic-release @semantic-release/commit-analyzer @semantic-release/release-notes-generator conventional-changelog-conventionalcommits
-
-      - name: Create tag from conventional commits
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release
+      - name: Auto release
+        run: |
+          VERSION=$(./gradlew -q calculateNextSemverVersion)
+          echo "version to release: $VERSION"
+          ./gradlew releaseVersion -PversionToRelease=$VERSION
