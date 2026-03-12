@@ -11,4 +11,3 @@ plugins {
 }
 
 rootProject.name = "libs-copilot"
-include("lib")

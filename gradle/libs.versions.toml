@@ -3,6 +3,18 @@
 
 [versions]
 junit-jupiter = "5.12.1"
+jakarta = "3.1.1"
+assertj = "3.27.6"
+mockito = "5.20.0"
+jackson = "2.19.2"
+langchain4j = "1.11.0"
 
 [libraries]
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
+langchain4j-google-ai-gemini = { module = "dev.langchain4j:langchain4j-google-ai-gemini", version.ref = "langchain4j" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }

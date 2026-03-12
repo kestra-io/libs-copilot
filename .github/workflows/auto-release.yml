@@ -41,6 +41,8 @@ jobs:
           credentials_json: '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}'
 
       - name: Build with Gradle
+        env:
+          GEMINI_API_KEY: '${{ secrets.GEMINI_API_KEY }}'
         run: |
           ./gradlew check
 
