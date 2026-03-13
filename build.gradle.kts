@@ -96,14 +96,14 @@ tasks.register("releaseVersion") {
 }
 
 fun setVersionInProperties(rawVersion: String) {
-    val newVersion = rawVersion.removePrefix("v")
+    val newVersion = rawVersion.removePrefix("v").trim().trim('"')
     val propertiesFile = rootProject.file("gradle.properties")
     val current = propertiesFile.readText()
-    val versionRegex = Regex("(?m)^version\\s*=\\s*\"?[^\"\\n]+\"?\\s*$")
+    val versionRegex = Regex("(?m)^version\\s*=\\s*[^\\n]+\\s*$")
     val updated = if (versionRegex.containsMatchIn(current)) {
-        current.replace(versionRegex, "version = \"$newVersion\"")
+        current.replace(versionRegex, "version=$newVersion")
     } else {
-        (current.trimEnd() + "\nversion = \"$newVersion\"\n")
+        (current.trimEnd() + "\nversion=$newVersion\n")
     }
     if (updated != current) {
         propertiesFile.writeText(updated)
