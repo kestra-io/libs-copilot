@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   tag:
-    if: ${{ github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'chore(release)') }}
+    if: ${{ github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'chore(release)') && !contains(github.event.head_commit.message, 'chore(version)') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
