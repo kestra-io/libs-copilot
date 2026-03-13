@@ -48,6 +48,15 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
+// maven publish
+val isBuildSnapshot = version.toString().endsWith("-SNAPSHOT")
+repositories {
+    mavenLocal()
+    mavenCentral()
+    if (isBuildSnapshot) {
+        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
+    }
+}
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
