@@ -60,7 +60,7 @@ tasks.register<Exec>("installAutotag") {
 }
 tasks.register<Exec>("calculateNextSemverVersion") {
     dependsOn("installAutotag")
-    commandLine(autotagBinary.get().asFile.absolutePath, "-ne", "--scheme=conventional", "--repo=../")
+    commandLine(autotagBinary.get().asFile.absolutePath, "-ne", "--scheme=conventional")
 }
 
 tasks.register("releaseVersion") {
