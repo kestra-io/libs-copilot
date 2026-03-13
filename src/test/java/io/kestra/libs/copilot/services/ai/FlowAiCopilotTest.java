@@ -3,8 +3,8 @@ package io.kestra.libs.copilot.services.ai;
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
-import io.kestra.libs.copilot.models.in.PluginMetadata;
 import io.kestra.libs.copilot.models.in.FlowGenerationPrompt;
+import io.kestra.libs.copilot.models.in.PluginMetadata;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +50,7 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
                 return "{\"type\":\"object\"}";
             },
             List.of(new PluginMetadata<>("io.kestra.plugin.core.log.Log", "Emit log entries", "tasks", false, 1)),
-            new FlowGenerationPrompt("conversation-1", "Add a log task", "existing: flow", null, "company.team"),
+            new FlowGenerationPrompt("conversation-1", "Add a log task", "existing: flow", "company.team"),
             "tenant-1"
         );
 
@@ -86,7 +86,6 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
             new FlowGenerationPrompt(
                 "conversation-llm-flow",
                 "Create the smallest valid Kestra flow possible with id llm_sanity_flow, namespace company.team, and exactly one Log task that logs Hello from Copilot test.",
-                null,
                 null,
                 "company.team"
             ),
