@@ -40,8 +40,13 @@ jobs:
         run: |
           ./gradlew check
 
-      - name: Auto release
+      - name: calculate next semver
+        id: calculate-next-semver
         run: |
           VERSION=$(./gradlew -q calculateNextSemverVersion)
-          echo "version to release: $VERSION"
-          ./gradlew releaseVersion -PversionToRelease=$VERSION
+          echo "version to release: ${VERSION}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Auto release
+        run: |
+          ./gradlew releaseVersion -PversionToRelease=${{ steps.calculate-next-semver.outputs.version }}
