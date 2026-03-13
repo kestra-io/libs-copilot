@@ -13,6 +13,8 @@ plugins {
     id("de.undercouch.download") version "5.7.0"
 }
 
+group "io.kestra.libs"
+
 dependencies {
     compileOnly(libs.jakarta.validation)
     compileOnly(libs.langchain4j)
