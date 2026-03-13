@@ -148,6 +148,7 @@ tasks.register("releaseVersion") {
         runGit("commit", "-m", "chore(version): release $gradleVersion")
         runGit("tag", tagName)
         runGit("push", "origin", tagName)
+        runGit("push")
     }
 }
 
