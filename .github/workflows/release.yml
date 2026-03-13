@@ -44,3 +44,9 @@ jobs:
         with:
           secrets: ${{ toJSON(secrets) }}
           is-private: true
+
+      - name: Publish java lib to Maven central
+        uses: kestra-io/actions/composite/publish-java@main
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          is-private: false
