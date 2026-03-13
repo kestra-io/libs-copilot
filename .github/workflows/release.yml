@@ -32,17 +32,8 @@ jobs:
         run: |
           ./gradlew build -x test
 
-      - name: Publish - Release package to Maven Central
-        env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USER }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
-          SONATYPE_GPG_KEYID: ${{ secrets.SONATYPE_GPG_KEYID }}
-          SONATYPE_GPG_PASSWORD: ${{ secrets.SONATYPE_GPG_PASSWORD }}
-          SONATYPE_GPG_FILE: ${{ secrets.SONATYPE_GPG_FILE}}
-        run: |
-          mkdir -p ~/.gradle/
-          echo "signing.keyId=${SONATYPE_GPG_KEYID}" > ~/.gradle/gradle.properties
-          echo "signing.password=${SONATYPE_GPG_PASSWORD}" >> ~/.gradle/gradle.properties
-          echo "signing.secretKeyRingFile=${HOME}/.gradle/secring.gpg" >> ~/.gradle/gradle.properties
-          echo ${SONATYPE_GPG_FILE} | base64 -d > ~/.gradle/secring.gpg
-          ./gradlew publishToMavenCentral
+      - name: Publish java lib to Maven central
+        uses: kestra-io/actions/composite/publish-java@main
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          is-private: false
