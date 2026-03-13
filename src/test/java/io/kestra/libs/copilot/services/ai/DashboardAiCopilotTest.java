@@ -3,8 +3,8 @@ package io.kestra.libs.copilot.services.ai;
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
-import io.kestra.libs.copilot.models.in.PluginMetadata;
 import io.kestra.libs.copilot.models.in.DashboardGenerationPrompt;
+import io.kestra.libs.copilot.models.in.PluginMetadata;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ class DashboardAiCopilotTest extends LlmAiCopilotTest {
                 return "{\"type\":\"object\"}";
             },
             List.of(new PluginMetadata<>("io.kestra.plugin.core.dashboard.chart.Markdown", "Render markdown", "charts", false, 1)),
-            new DashboardGenerationPrompt("conversation-1", "Create a markdown dashboard", "id: old-dashboard", null)
+            new DashboardGenerationPrompt("conversation-1", "Create a markdown dashboard", "id: old-dashboard")
         );
 
         assertThat(yaml).isEqualTo("id: generated-dashboard");
@@ -85,7 +85,6 @@ class DashboardAiCopilotTest extends LlmAiCopilotTest {
             new DashboardGenerationPrompt(
                 "conversation-llm-dashboard",
                 "Create the smallest valid Kestra dashboard possible with id llm-sanity-dashboard, title LLM Sanity Dashboard, and exactly one Markdown chart with a short heading and the sentence 'Hello world'.",
-                null,
                 null
             )
         );
