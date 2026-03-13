@@ -28,22 +28,9 @@ jobs:
           java-enabled: 'true'
           java-version: '25'
 
-      - name: GCP - Auth with github service account
-        id: glogin
-        uses: 'google-github-actions/auth@v3'
-        with:
-          token_format: 'access_token'
-          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
-
       - name: Build package
         run: |
           ./gradlew build -x test
-
-      - name: Publish java lib to our private registry
-        uses: kestra-io/actions/composite/publish-java@main
-        with:
-          secrets: ${{ toJSON(secrets) }}
-          is-private: true
 
       - name: Publish java lib to Maven central
         uses: kestra-io/actions/composite/publish-java@main

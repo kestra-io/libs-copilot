@@ -9,7 +9,7 @@ plugins {
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
     `maven-publish`
-    id("com.google.cloud.artifactregistry.gradle-plugin") version "2.2.5"
+    id("com.vanniktech.maven.publish") version "0.33.0"
     id("de.undercouch.download") version "5.7.0"
 }
 
@@ -46,6 +46,36 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+    coordinates("${project.group}", "${project.name}", "${project.version}")
+
+    pom {
+        name.set(project.name)
+        description.set("${project.group}:${project.name}:${rootProject.version}")
+        url.set("https://github.com/kestra-io/${rootProject.name}")
+
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("tchiotludo")
+                name.set("Ludovic Dehon")
+                email.set("ldehon@kestra.io")
+            }
+        }
+        scm {
+            connection.set("scm:git:")
+            url.set("https://github.com/kestra-io/${rootProject.name}")
+        }
+    }
 }
 
 // release
@@ -107,41 +137,5 @@ fun setVersionInProperties(rawVersion: String) {
     }
     if (updated != current) {
         propertiesFile.writeText(updated)
-    }
-}
-
-// maven publish
-val isBuildSnapshot = version.toString().endsWith("-SNAPSHOT")
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url = uri("artifactregistry://europe-west1-maven.pkg.dev/kestra-host/maven") }
-    if (isBuildSnapshot) {
-        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
-        maven { url = uri("artifactregistry://europe-west1-maven.pkg.dev/kestra-host/maven-snapshot") }
-    }
-}
-
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "io.kestra"
-            artifactId = project.name
-            version = project.version.toString()
-
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            url = uri(
-                if (isBuildSnapshot) {
-                    "artifactregistry://europe-west1-maven.pkg.dev/kestra-host/maven-snapshot"
-                } else {
-                    "artifactregistry://europe-west1-maven.pkg.dev/kestra-host/maven"
-                }
-            )
-        }
     }
 }

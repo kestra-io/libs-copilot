@@ -20,13 +20,6 @@ jobs:
           java-enabled: 'true'
           java-version: '25'
 
-
-      - name: Auth to Google Cloud
-        id: auth
-        uses: 'google-github-actions/auth@v3'
-        with:
-          credentials_json: '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}'
-
       - name: Build with Gradle
         env:
           GEMINI_API_KEY: '${{ secrets.GEMINI_API_KEY }}'
