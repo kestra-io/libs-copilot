@@ -11,3 +11,9 @@ plugins {
 }
 
 rootProject.name = "libs-copilot"
+
+gradle.settingsEvaluated {
+    if (gradle.startParameter.taskNames.any { it == "publishToMavenCentral" }) {
+        gradle.startParameter.isConfigurationCacheRequested = false
+    }
+}
