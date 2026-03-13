@@ -11,9 +11,11 @@ plugins {
     `maven-publish`
     id("com.vanniktech.maven.publish") version "0.33.0"
     id("de.undercouch.download") version "5.7.0"
+    id("signing")
 }
 
-project.group "io.kestra.libs"
+group = "io.kestra.libs"
+description = "Kestra lib for AI Copilot-related services"
 
 dependencies {
     compileOnly(libs.jakarta.validation)
@@ -86,6 +88,19 @@ mavenPublishing {
             connection.set("scm:git:")
             url.set("https://github.com/kestra-io/${rootProject.name}")
         }
+    }
+}
+tasks.named<org.gradle.jvm.tasks.Jar>("jar") {
+    manifest {
+        attributes(
+            mapOf(
+                "X-Kestra-Name" to project.name,
+                "X-Kestra-Title" to "Kestra libs-copilot",
+                "X-Kestra-Group" to project.group,
+                "X-Kestra-Description" to (project.description),
+                "X-Kestra-Version" to project.version
+            )
+        )
     }
 }
 
