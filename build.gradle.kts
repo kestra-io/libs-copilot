@@ -62,7 +62,7 @@ repositories {
     }
 }
 mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.DEFAULT)
+    publishToMavenCentral(automaticRelease = true)
     signAllPublications()
     coordinates("${project.group}", "${project.name}", "${project.version}")
 
