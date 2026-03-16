@@ -138,10 +138,18 @@ tasks.register("releaseVersion") {
         fun runGit(vararg args: String) {
             val process = ProcessBuilder(listOf("git") + args)
                 .directory(rootProject.projectDir)
-                .inheritIO()
                 .start()
+            val stdout = process.inputStream.bufferedReader().readText()
+            val stderr = process.errorStream.bufferedReader().readText()
             val exitCode = process.waitFor()
             if (exitCode != 0) {
+                logger.error("git ${args.joinToString(" ")} failed with exit code $exitCode")
+                if (stdout.isNotBlank()) {
+                    logger.error("git stdout:\n$stdout")
+                }
+                if (stderr.isNotBlank()) {
+                    logger.error("git stderr:\n$stderr")
+                }
                 throw GradleException("git ${args.joinToString(" ")} failed with exit code $exitCode")
             }
         }
