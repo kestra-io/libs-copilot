@@ -63,18 +63,18 @@ public class FlowAiCopilot<F> extends AbstractAiCopilot<F> {
         String tenantId
     ) {
         return generateYaml(
-            flowGenerationPrompt.yaml(),
-            flowGenerationPrompt.userPrompt(),
+            flowGenerationPrompt.getYaml(),
+            flowGenerationPrompt.getUserPrompt(),
             pluginFinder,
             plugins,
             jsonSchemaWithPluginsGenerator,
             (schemaJson) -> flowYamlBuilder.buildFlow(
                 schemaJson,
                 badRequestMessage(),
-                Optional.ofNullable(flowGenerationPrompt.yaml()).orElse(""),
-                flowGenerationPrompt.namespace(),
+                Optional.ofNullable(flowGenerationPrompt.getYaml()).orElse(""),
+                flowGenerationPrompt.getNamespace(),
                 tenantId,
-                flowGenerationPrompt.userPrompt()
+                flowGenerationPrompt.getUserPrompt()
             )
         );
     }

@@ -17,16 +17,15 @@ public class DashboardGenerationPrompt {
         this.yaml = yaml;
     }
 
-    public String conversationId() {
+    public String getConversationId() {
         return conversationId;
     }
 
-    public String userPrompt() {
+    public String getUserPrompt() {
         return userPrompt;
     }
 
-    public String yaml() {
+    public String getYaml() {
         return yaml;
     }
 }
-

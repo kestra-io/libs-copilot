@@ -64,12 +64,12 @@ public class DashboardAiCopilot<D> extends AbstractAiCopilot<D> {
         DashboardGenerationPrompt dashboardGenerationPrompt
     ) {
         return generateYaml(
-            dashboardGenerationPrompt.yaml(),
-            dashboardGenerationPrompt.userPrompt(),
+            dashboardGenerationPrompt.getYaml(),
+            dashboardGenerationPrompt.getUserPrompt(),
             pluginFinder,
             plugins,
             jsonSchemaWithPluginsGenerator,
-            (schema) -> dashboardYamlBuilder.buildDashboard(schema, badRequestMessage(), dashboardGenerationPrompt.userPrompt())
+            (schema) -> dashboardYamlBuilder.buildDashboard(schema, badRequestMessage(), dashboardGenerationPrompt.getUserPrompt())
         );
     }
 }

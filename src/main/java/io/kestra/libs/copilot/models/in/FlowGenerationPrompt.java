@@ -19,19 +19,19 @@ public class FlowGenerationPrompt {
         this.namespace = namespace;
     }
 
-    public String conversationId() {
+    public String getConversationId() {
         return conversationId;
     }
 
-    public String userPrompt() {
+    public String getUserPrompt() {
         return userPrompt;
     }
 
-    public String yaml() {
+    public String getYaml() {
         return yaml;
     }
 
-    public String namespace() {
+    public String getNamespace() {
         return namespace;
     }
 }
