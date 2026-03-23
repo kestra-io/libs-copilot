@@ -6,7 +6,7 @@ import dev.langchain4j.service.V;
 
 public interface FlowYamlBuilder {
     @SystemMessage("""
-        You are an expert in generating Kestra Flow YAML. Your task is to generate a valid Kestra Flow YAML that follows user's requirements strictly following the following json schema (when provided):
+        You are an expert in generating Kestra Flow YAML. Your task is to generate a valid Kestra Flow YAML that follows user's requirements strictly following the following json schema (when provided, in Toon format):
         ```
         {_{flowSchema}_}
         ```

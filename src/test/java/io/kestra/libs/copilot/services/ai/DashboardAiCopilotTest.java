@@ -1,10 +1,12 @@
 package io.kestra.libs.copilot.services.ai;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import io.kestra.libs.copilot.models.in.DashboardGenerationPrompt;
 import io.kestra.libs.copilot.models.in.PluginMetadata;
+import io.kestra.libs.copilot.utils.ToonUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +30,13 @@ class DashboardAiCopilotTest extends LlmAiCopilotTest {
     }
 
     @Test
-    void generateDashboardPassesDashboardSpecificArgumentsToBuilder() {
+    void generateDashboardPassesDashboardSpecificArgumentsToBuilder() throws JsonProcessingException {
         PluginFinder pluginFinder = mock(PluginFinder.class);
         when(pluginFinder.findPlugins(anyString(), anyString())).thenReturn(List.of("io.kestra.plugin.core.dashboard.chart.Markdown"));
 
         DashboardYamlBuilder dashboardYamlBuilder = mock(DashboardYamlBuilder.class);
         when(dashboardYamlBuilder.buildDashboard(
-            eq("{\"type\":\"object\"}"),
+            eq(ToonUtils.jsonToToon(JacksonMapper.ofJson().readTree("{\"type\":\"object\"}"))),
             eq(DashboardAiCopilot.BAD_REQUEST_ERROR),
             eq("Create a markdown dashboard")
         )).thenReturn("id: generated-dashboard");

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.kestra.libs.copilot.exceptions.AiException;
 import io.kestra.libs.copilot.models.in.PluginMetadata;
 import io.kestra.libs.copilot.utils.FunctionChecked;
+import io.kestra.libs.copilot.utils.ToonUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -54,7 +55,9 @@ public abstract class AbstractAiCopilot<T> {
     }
 
     public static String minifySchema(String schema) throws JsonProcessingException {
-        return JacksonMapper.ofJson().writeValueAsString(minifySchema(JacksonMapper.ofJson().readTree(schema)));
+        return ToonUtils.jsonToToon(
+                minifySchema(JacksonMapper.ofJson().readTree(schema))
+        );
     }
 
     public static JsonNode minifySchema(JsonNode node) throws JsonProcessingException {

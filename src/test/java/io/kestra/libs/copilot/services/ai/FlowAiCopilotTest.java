@@ -1,10 +1,12 @@
 package io.kestra.libs.copilot.services.ai;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import io.kestra.libs.copilot.models.in.FlowGenerationPrompt;
 import io.kestra.libs.copilot.models.in.PluginMetadata;
+import io.kestra.libs.copilot.utils.ToonUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +30,13 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
     }
 
     @Test
-    void generateFlowPassesFlowSpecificArgumentsToBuilder() {
+    void generateFlowPassesFlowSpecificArgumentsToBuilder() throws JsonProcessingException {
         PluginFinder pluginFinder = mock(PluginFinder.class);
         when(pluginFinder.findPlugins(anyString(), anyString())).thenReturn(List.of("io.kestra.plugin.core.log.Log"));
 
         FlowYamlBuilder flowYamlBuilder = mock(FlowYamlBuilder.class);
         when(flowYamlBuilder.buildFlow(
-            eq("{\"type\":\"object\"}"),
+            eq(ToonUtils.jsonToToon(JacksonMapper.ofJson().readTree("{\"type\":\"object\"}"))),
             eq(FlowAiCopilot.BAD_REQUEST_ERROR),
             eq("existing: flow"),
             eq("company.team"),
