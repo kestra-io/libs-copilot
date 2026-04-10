@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.kestra.libs.copilot.exceptions.AiException;
 import io.kestra.libs.copilot.models.in.PluginMetadata;
 import io.kestra.libs.copilot.utils.FunctionChecked;
+import io.kestra.libs.copilot.utils.JsonSchemaToTypeScript;
 import io.kestra.libs.copilot.utils.ToonUtils;
 
 import java.util.Comparator;
@@ -55,9 +56,26 @@ public abstract class AbstractAiCopilot<T> {
     }
 
     public static String minifySchema(String schema) throws JsonProcessingException {
-        return ToonUtils.jsonToToon(
-                minifySchema(JacksonMapper.ofJson().readTree(schema))
-        );
+        return minifySchema(schema, true);
+    }
+
+    public enum SchemaFormat { JSON, TOON, TYPESCRIPT }
+
+    /**
+     * Minify a JSON schema string, optionally converting to TOON format.
+     * When {@code useToon} is false, the result is compact JSON (for benchmarking).
+     */
+    public static String minifySchema(String schema, boolean useToon) throws JsonProcessingException {
+        return minifySchema(schema, useToon ? SchemaFormat.TOON : SchemaFormat.JSON);
+    }
+
+    public static String minifySchema(String schema, SchemaFormat format) throws JsonProcessingException {
+        JsonNode minified = minifySchema(JacksonMapper.ofJson().readTree(schema));
+        return switch (format) {
+            case TOON -> ToonUtils.jsonToToon(minified);
+            case TYPESCRIPT -> JsonSchemaToTypeScript.convert(minified);
+            case JSON -> JacksonMapper.ofJson().writeValueAsString(minified);
+        };
     }
 
     public static JsonNode minifySchema(JsonNode node) throws JsonProcessingException {
