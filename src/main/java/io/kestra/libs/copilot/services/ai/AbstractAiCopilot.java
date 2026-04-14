@@ -1,18 +1,19 @@
 package io.kestra.libs.copilot.services.ai;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.kestra.libs.copilot.exceptions.AiException;
-import io.kestra.libs.copilot.models.in.PluginMetadata;
-import io.kestra.libs.copilot.utils.FunctionChecked;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.kestra.libs.copilot.exceptions.AiException;
+import io.kestra.libs.copilot.models.in.PluginMetadata;
+import io.kestra.libs.copilot.utils.FunctionChecked;
 
 public abstract class AbstractAiCopilot<T> {
     protected Class<T> clazz;
@@ -24,17 +25,23 @@ public abstract class AbstractAiCopilot<T> {
     protected <V extends Comparable<V>> List<String> mostRelevantPlugins(PluginFinder pluginFinder, String userPrompt,
         List<PluginMetadata<V>> plugins) {
         Map<String, String> descriptionByType = plugins.stream()
-            .sorted(Comparator.<PluginMetadata<V>, V>comparing(PluginMetadata::version).reversed())
+            .sorted(Comparator.<PluginMetadata<V>, V> comparing(PluginMetadata::version).reversed())
             .filter(plugin -> !excludedPluginKinds().contains(plugin.kind()))
             .filter(plugin -> !plugin.deprecated())
-            .collect(Collectors.toMap(PluginMetadata::type,
-                plugin -> plugin.description() == null ? "" : plugin.description(),
-                (existing, ignored) -> existing));
+            .collect(
+                Collectors.toMap(
+                    PluginMetadata::type,
+                    plugin -> plugin.description() == null ? "" : plugin.description(),
+                    (existing, ignored) -> existing
+                )
+            );
 
         String serializedPlugins;
         try {
-            serializedPlugins = JacksonMapper.ofJson().writeValueAsString(descriptionByType.entrySet().stream()
-                .map(entry -> Map.of("type", entry.getKey(), "description", entry.getValue())).toList());
+            serializedPlugins = JacksonMapper.ofJson().writeValueAsString(
+                descriptionByType.entrySet().stream()
+                    .map(entry -> Map.of("type", entry.getKey(), "description", entry.getValue())).toList()
+            );
         } catch (JsonProcessingException e) {
             serializedPlugins = "[]";
         }
@@ -60,11 +67,14 @@ public abstract class AbstractAiCopilot<T> {
             ObjectNode obj = (ObjectNode) node;
             obj.remove("$dynamic");
             obj.remove("$group");
-            if (obj.optional("default").map(defaultNode -> defaultNode.isBoolean() && !defaultNode.asBoolean())
-                .orElse(false)) {
+            if (
+                obj.optional("default").map(defaultNode -> defaultNode.isBoolean() && !defaultNode.asBoolean())
+                    .orElse(false)
+            ) {
                 obj.remove("default");
             }
-            obj.properties().forEach(entry -> {
+            obj.properties().forEach(entry ->
+            {
                 try {
                     minifySchema(entry.getValue());
                 } catch (JsonProcessingException e) {
@@ -94,11 +104,14 @@ public abstract class AbstractAiCopilot<T> {
         YamlGenerator yamlGenerator) {
         String enhancedPrompt = String.format(
             "Current " + clazz.getSimpleName() + " YAML:\n```yaml\n%s\n```\n\nUser's prompt:\n```\n%s\n```",
-            Optional.ofNullable(originalYaml).orElse(""), userPrompt);
+            Optional.ofNullable(originalYaml).orElse(""), userPrompt
+        );
         String minifiedSchemaForPlugins;
         try {
-            minifiedSchemaForPlugins = minifySchema(jsonSchemaWithPluginsGenerator
-                .apply(mostRelevantPlugins(pluginFinder, enhancedPrompt, availablePlugins)));
+            minifiedSchemaForPlugins = minifySchema(
+                jsonSchemaWithPluginsGenerator
+                    .apply(mostRelevantPlugins(pluginFinder, enhancedPrompt, availablePlugins))
+            );
         } catch (Exception e) {
             throw new AiException(this.badRequestMessage());
         }

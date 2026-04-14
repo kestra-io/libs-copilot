@@ -1,6 +1,7 @@
 package io.kestra.libs.copilot.models.in;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+
 import jakarta.validation.constraints.NotNull;
 
 public class FlowGenerationPrompt {

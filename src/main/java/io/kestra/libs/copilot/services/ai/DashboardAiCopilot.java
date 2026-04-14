@@ -1,10 +1,10 @@
 package io.kestra.libs.copilot.services.ai;
 
+import java.util.List;
+
 import io.kestra.libs.copilot.models.in.DashboardGenerationPrompt;
 import io.kestra.libs.copilot.models.in.PluginMetadata;
 import io.kestra.libs.copilot.utils.FunctionChecked;
-
-import java.util.List;
 
 import static io.kestra.libs.copilot.models.in.PluginMetadata.*;
 
@@ -12,7 +12,10 @@ public class DashboardAiCopilot<D> extends AbstractAiCopilot<D> {
     static final String ALREADY_VALID_MESSAGE = "This dashboard already performs the requested action. Please provide additional instructions if you would like to request modifications.";
     static final String BAD_REQUEST_ERROR = "I can only assist with creating Kestra dashboards.";
     static final String UNABLE_TO_GENERATE_ERROR = "The prompt did not provide enough information to generate a valid dashboard. Please clarify your request.";
-    static final List<String> POSSIBLE_ERROR_MESSAGES = List.of(ALREADY_VALID_MESSAGE, BAD_REQUEST_ERROR, UNABLE_TO_GENERATE_ERROR);
+    static final List<String> POSSIBLE_ERROR_MESSAGES = List.of(
+        ALREADY_VALID_MESSAGE, BAD_REQUEST_ERROR,
+        UNABLE_TO_GENERATE_ERROR
+    );
 
     private static final List<String> EXCLUDED_PLUGIN_TYPES = List.of(
         STORAGES_GROUP_NAME,
@@ -61,15 +64,17 @@ public class DashboardAiCopilot<D> extends AbstractAiCopilot<D> {
         DashboardYamlBuilder dashboardYamlBuilder,
         FunctionChecked<List<String>, String> jsonSchemaWithPluginsGenerator,
         List<PluginMetadata<V>> plugins,
-        DashboardGenerationPrompt dashboardGenerationPrompt
-    ) {
+        DashboardGenerationPrompt dashboardGenerationPrompt) {
         return generateYaml(
             dashboardGenerationPrompt.getYaml(),
             dashboardGenerationPrompt.getUserPrompt(),
             pluginFinder,
             plugins,
             jsonSchemaWithPluginsGenerator,
-            (enhancedPrompt, schema) -> dashboardYamlBuilder.buildDashboard(schema, badRequestMessage(), enhancedPrompt)
+            (enhancedPrompt, schema) -> dashboardYamlBuilder.buildDashboard(
+                schema, badRequestMessage(),
+                enhancedPrompt
+            )
         );
     }
 }

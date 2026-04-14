@@ -7,8 +7,7 @@ public record PluginMetadata<V extends Comparable<V>>(
     String description,
     String kind,
     boolean deprecated,
-    V version
-) {
+    V version) {
     public static final String TASKS_GROUP_NAME = "tasks";
     public static final String TRIGGERS_GROUP_NAME = "triggers";
     public static final String CONDITIONS_GROUP_NAME = "conditions";
