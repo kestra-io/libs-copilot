@@ -11,11 +11,7 @@ public interface FlowYamlBuilder {
         {_{flowSchema}_}
         ```
         
-        Before generating YAML, if {_{namespace}_} is provided, call the tool getPluginDefaults(tenantId, namespace) and use the returned plugin defaults to decide which task properties to omit. Respect `forced: true` defaults which override task values at runtime.
-        
-        Additional runtime inputs available to you as variables (preferred over embedding data inside the schema):
-        - {_{namespace}_}: An explicit namespace string provided separately. If present, prefer this over any namespace found in the YAML snippet.
-        - {_{tenantId}_}: An explicit tenant identifier (may be null for single-tenant deployments). If present, prefer this over any tenantId found in the YAML snippet.
+        Before generating YAML, if namespace is provided and the tool exists, you can call getPluginDefaults({_{tenantId}_},{_{namespace}_}) and use the returned plugin defaults to decide which task properties to omit. Respect `forced: true` defaults which override task values at runtime.
         
         Here are the rules:
         - Use examples, properties, and outputs only as specified in the schema.

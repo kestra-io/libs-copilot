@@ -33,11 +33,13 @@ class DashboardAiCopilotTest extends LlmAiCopilotTest {
         when(pluginFinder.findPlugins(anyString(), anyString())).thenReturn(List.of("io.kestra.plugin.core.dashboard.chart.Markdown"));
 
         DashboardYamlBuilder dashboardYamlBuilder = mock(DashboardYamlBuilder.class);
+        String initialDashboard = "id: old-dashboard";
         when(dashboardYamlBuilder.buildDashboard(
             eq("{\"type\":\"object\"}"),
             eq(DashboardAiCopilot.BAD_REQUEST_ERROR),
-            eq("Create a markdown dashboard")
-        )).thenReturn("id: generated-dashboard");
+            eq(String.format(
+                "Current Object YAML:\n```yaml\n%s\n```\n\nUser's prompt:\n```\n%s\n```",
+                initialDashboard, "Create a markdown dashboard")))).thenReturn("id: generated-dashboard");
 
         String yaml = new TestDashboardAiCopilot().generateDashboard(
             pluginFinder,
@@ -47,8 +49,7 @@ class DashboardAiCopilotTest extends LlmAiCopilotTest {
                 return "{\"type\":\"object\"}";
             },
             List.of(new PluginMetadata<>("io.kestra.plugin.core.dashboard.chart.Markdown", "Render markdown", "charts", false, 1)),
-            new DashboardGenerationPrompt("conversation-1", "Create a markdown dashboard", "id: old-dashboard")
-        );
+            new DashboardGenerationPrompt("conversation-1", "Create a markdown dashboard", initialDashboard));
 
         assertThat(yaml).isEqualTo("id: generated-dashboard");
     }
@@ -65,12 +66,10 @@ class DashboardAiCopilotTest extends LlmAiCopilotTest {
             PluginMetadata.CONDITIONS_GROUP_NAME,
             PluginMetadata.ASSETS_GROUP_NAME,
             PluginMetadata.ASSETS_EXPORTERS_GROUP_NAME,
-            PluginMetadata.LOG_EXPORTERS_GROUP_NAME
-        );
+            PluginMetadata.LOG_EXPORTERS_GROUP_NAME);
     }
 
-    @Test
-    @Tag("llm")
+    @Test @Tag("llm")
     void sanityCheckGenerateDashboardWithRealLlm() throws Exception {
         ChatModel model = realChatModel();
 
@@ -81,13 +80,12 @@ class DashboardAiCopilotTest extends LlmAiCopilotTest {
             pluginFinder,
             dashboardYamlBuilder,
             (ignoredPlugins) -> TestSchemas.DASHBOARD_SCHEMA,
-            List.of(new PluginMetadata<>("io.kestra.plugin.core.dashboard.chart.Markdown", "Add context and insights with Markdown.", "charts", false, 1)),
+            List.of(new PluginMetadata<>("io.kestra.plugin.core.dashboard.chart.Markdown", "Add context and insights with Markdown.", "charts", false,
+                1)),
             new DashboardGenerationPrompt(
                 "conversation-llm-dashboard",
                 "Create the smallest valid Kestra dashboard possible with id llm-sanity-dashboard, title LLM Sanity Dashboard, and exactly one Markdown chart with a short heading and the sentence 'Hello world'.",
-                null
-            )
-        );
+                null));
 
         JsonNode parsedYaml = JacksonMapper.ofYaml().readTree(yaml);
 

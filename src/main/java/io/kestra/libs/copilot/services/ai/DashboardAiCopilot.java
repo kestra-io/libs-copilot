@@ -69,7 +69,7 @@ public class DashboardAiCopilot<D> extends AbstractAiCopilot<D> {
             pluginFinder,
             plugins,
             jsonSchemaWithPluginsGenerator,
-            (schema) -> dashboardYamlBuilder.buildDashboard(schema, badRequestMessage(), dashboardGenerationPrompt.getUserPrompt())
+            (enhancedPrompt, schema) -> dashboardYamlBuilder.buildDashboard(schema, badRequestMessage(), enhancedPrompt)
         );
     }
 }

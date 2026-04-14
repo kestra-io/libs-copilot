@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,14 +32,16 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
         when(pluginFinder.findPlugins(anyString(), anyString())).thenReturn(List.of("io.kestra.plugin.core.log.Log"));
 
         FlowYamlBuilder flowYamlBuilder = mock(FlowYamlBuilder.class);
+        String initialFlow = "existing: flow";
         when(flowYamlBuilder.buildFlow(
             eq("{\"type\":\"object\"}"),
             eq(FlowAiCopilot.BAD_REQUEST_ERROR),
-            eq("existing: flow"),
+            eq(initialFlow),
             eq("company.team"),
             eq("tenant-1"),
-            eq("Add a log task")
-        )).thenReturn("id: generated");
+            eq(String.format(
+                "Current Object YAML:\n```yaml\n%s\n```\n\nUser's prompt:\n```\n%s\n```",
+                initialFlow, "Add a log task")))).thenReturn("id: generated");
 
         String yaml = new TestFlowAiCopilot().generateFlow(
             pluginFinder,
@@ -50,9 +51,8 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
                 return "{\"type\":\"object\"}";
             },
             List.of(new PluginMetadata<>("io.kestra.plugin.core.log.Log", "Emit log entries", "tasks", false, 1)),
-            new FlowGenerationPrompt("conversation-1", "Add a log task", "existing: flow", "company.team"),
-            "tenant-1"
-        );
+            new FlowGenerationPrompt("conversation-1", "Add a log task", initialFlow, "company.team"),
+            "tenant-1");
 
         assertThat(yaml).isEqualTo("id: generated");
     }
@@ -66,12 +66,10 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
             PluginMetadata.APP_BLOCKS_GROUP_NAME,
             PluginMetadata.CHARTS_GROUP_NAME,
             PluginMetadata.DATA_FILTERS_GROUP_NAME,
-            PluginMetadata.DATA_FILTERS_KPI_GROUP_NAME
-        );
+            PluginMetadata.DATA_FILTERS_KPI_GROUP_NAME);
     }
 
-    @Test
-    @Tag("llm")
+    @Test @Tag("llm")
     void sanityCheckGenerateFlowWithRealLlm() throws Exception {
         ChatModel model = realChatModel();
 
@@ -87,10 +85,8 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
                 "conversation-llm-flow",
                 "Create the smallest valid Kestra flow possible with id llm_sanity_flow, namespace company.team, and exactly one Log task that logs Hello from Copilot test.",
                 null,
-                "company.team"
-            ),
-            "my_tenant"
-        );
+                "company.team"),
+            "my_tenant");
 
         JsonNode parsedYaml = JacksonMapper.ofYaml().readTree(yaml);
 
