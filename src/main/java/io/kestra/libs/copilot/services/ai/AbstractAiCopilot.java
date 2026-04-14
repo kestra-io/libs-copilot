@@ -21,26 +21,20 @@ public abstract class AbstractAiCopilot<T> {
         this.clazz = clazz;
     }
 
-    protected <V extends Comparable<V>> List<String> mostRelevantPlugins(
-            PluginFinder pluginFinder,
-            String userPrompt,
-            List<PluginMetadata<V>> plugins
-    ) {
+    protected <V extends Comparable<V>> List<String> mostRelevantPlugins(PluginFinder pluginFinder, String userPrompt,
+        List<PluginMetadata<V>> plugins) {
         Map<String, String> descriptionByType = plugins.stream()
-                .sorted(Comparator.<PluginMetadata<V>, V>comparing(PluginMetadata::version).reversed())
-                .filter(plugin -> !excludedPluginKinds().contains(plugin.kind()))
-                .filter(plugin -> !plugin.deprecated())
-                .collect(Collectors.toMap(
-                        PluginMetadata::type,
-                        plugin -> plugin.description() == null ? "" : plugin.description(),
-                        (existing, ignored) -> existing
-                ));
+            .sorted(Comparator.<PluginMetadata<V>, V>comparing(PluginMetadata::version).reversed())
+            .filter(plugin -> !excludedPluginKinds().contains(plugin.kind()))
+            .filter(plugin -> !plugin.deprecated())
+            .collect(Collectors.toMap(PluginMetadata::type,
+                plugin -> plugin.description() == null ? "" : plugin.description(),
+                (existing, ignored) -> existing));
 
         String serializedPlugins;
         try {
             serializedPlugins = JacksonMapper.ofJson().writeValueAsString(descriptionByType.entrySet().stream()
-                    .map(entry -> Map.of("type", entry.getKey(), "description", entry.getValue()))
-                    .toList());
+                .map(entry -> Map.of("type", entry.getKey(), "description", entry.getValue())).toList());
         } catch (JsonProcessingException e) {
             serializedPlugins = "[]";
         }
@@ -66,7 +60,8 @@ public abstract class AbstractAiCopilot<T> {
             ObjectNode obj = (ObjectNode) node;
             obj.remove("$dynamic");
             obj.remove("$group");
-            if (obj.optional("default").map(defaultNode -> defaultNode.isBoolean() && !defaultNode.asBoolean()).orElse(false)) {
+            if (obj.optional("default").map(defaultNode -> defaultNode.isBoolean() && !defaultNode.asBoolean())
+                .orElse(false)) {
                 obj.remove("default");
             }
             obj.properties().forEach(entry -> {
@@ -90,32 +85,24 @@ public abstract class AbstractAiCopilot<T> {
 
     @FunctionalInterface
     protected interface YamlGenerator {
-        String generate(String schemaJson);
+        String generate(String enhancedPrompt, String schemaJson);
     }
 
-    protected <V extends Comparable<V>> String generateYaml(
-            String originalYaml,
-            String userPrompt,
-            PluginFinder pluginFinder,
-            List<PluginMetadata<V>> availablePlugins,
-            FunctionChecked<List<String>, String> jsonSchemaWithPluginsGenerator,
-            YamlGenerator yamlGenerator
-    ) {
+    protected <V extends Comparable<V>> String generateYaml(String originalYaml, String userPrompt,
+        PluginFinder pluginFinder, List<PluginMetadata<V>> availablePlugins,
+        FunctionChecked<List<String>, String> jsonSchemaWithPluginsGenerator,
+        YamlGenerator yamlGenerator) {
         String enhancedPrompt = String.format(
-                "Current " + clazz.getSimpleName() + " YAML:\n```yaml\n%s\n```\n\nUser's prompt:\n``\n%s\n```",
-                Optional.ofNullable(originalYaml).orElse(""),
-                userPrompt
-        );
-
+            "Current " + clazz.getSimpleName() + " YAML:\n```yaml\n%s\n```\n\nUser's prompt:\n```\n%s\n```",
+            Optional.ofNullable(originalYaml).orElse(""), userPrompt);
         String minifiedSchemaForPlugins;
         try {
-            minifiedSchemaForPlugins = minifySchema(jsonSchemaWithPluginsGenerator.apply(
-                    mostRelevantPlugins(pluginFinder, enhancedPrompt, availablePlugins)
-            ));
+            minifiedSchemaForPlugins = minifySchema(jsonSchemaWithPluginsGenerator
+                .apply(mostRelevantPlugins(pluginFinder, enhancedPrompt, availablePlugins)));
         } catch (Exception e) {
             throw new AiException(this.badRequestMessage());
         }
-        String yaml = yamlGenerator.generate(minifiedSchemaForPlugins);
+        String yaml = yamlGenerator.generate(enhancedPrompt, minifiedSchemaForPlugins);
         if (possibleErrorMessages() != null && possibleErrorMessages().contains(yaml)) {
             throw new AiException(yaml);
         }

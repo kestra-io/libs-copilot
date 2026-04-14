@@ -153,7 +153,7 @@ class AbstractAiCopilotTest {
             pluginFinderMock(),
             Collections.emptyList(),
             (ignored) -> "{\"type\":\"object\",\"properties\":{\"a\":{\"default\":false}}}",
-            (ignored) -> "```yaml\na: 1\n```"
+            (enhancedPrompt, schemaJson) -> "```yaml\na: 1\n```"
         );
 
         assertThat(yaml).isEqualTo("a: 1");
@@ -170,7 +170,7 @@ class AbstractAiCopilotTest {
             pluginFinderMock(),
             Collections.emptyList(),
             (ignored) -> "{\"type\":\"object\"}",
-            (ignored) -> TestAiCopilot.ALREADY_VALID_MESSAGE
+            (enhancedPrompt, schemaJson) -> TestAiCopilot.ALREADY_VALID_MESSAGE
         ))
             .isInstanceOf(AiException.class)
             .hasMessage(TestAiCopilot.ALREADY_VALID_MESSAGE);
@@ -182,7 +182,7 @@ class AbstractAiCopilotTest {
             pluginFinderMock(),
             Collections.emptyList(),
             (ignored) -> "{\"type\":\"object\"}",
-            (ignored) -> "Any message"
+            (enhancedPrompt, schemaJson) -> "Any message"
         )).isEqualTo("Any message");
     }
 
@@ -197,7 +197,7 @@ class AbstractAiCopilotTest {
             pluginFinderMock(),
             Collections.emptyList(),
             (ignored) -> "{\"type\":\"object\"}",
-            (schemaJson) -> "```yaml\nmy: value\n```"
+            (enhancedPrompt, schemaJson) -> "```yaml\nmy: value\n```"
         ))
             .isInstanceOf(AiException.class)
             .hasMessage(copilot.alreadyValidMessage());
