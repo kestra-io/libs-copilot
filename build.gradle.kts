@@ -12,6 +12,9 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.33.0"
     id("de.undercouch.download") version "5.7.0"
     id("signing")
+
+    // Formatting
+    id("io.kestra.gradle.spotless-conventions") version "1.0.4"
 }
 
 group = "io.kestra.libs"

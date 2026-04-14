@@ -1,15 +1,17 @@
 package io.kestra.libs.copilot.services.ai;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.kestra.libs.copilot.exceptions.AiException;
-import io.kestra.libs.copilot.models.in.PluginMetadata;
-import io.kestra.libs.copilot.utils.FunctionChecked;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Collections;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.kestra.libs.copilot.exceptions.AiException;
+import io.kestra.libs.copilot.models.in.PluginMetadata;
+import io.kestra.libs.copilot.utils.FunctionChecked;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,7 +56,8 @@ class AbstractAiCopilotTest {
             return List.of();
         }
 
-        private <VER extends Comparable<VER>> List<String> publicMostRelevantPlugins(PluginFinder pluginFinder, String userPrompt, List<PluginMetadata<VER>> plugins, List<String> excludedPluginTypes) {
+        private <VER extends Comparable<VER>> List<String> publicMostRelevantPlugins(PluginFinder pluginFinder, String userPrompt, List<PluginMetadata<VER>> plugins,
+            List<String> excludedPluginTypes) {
             return mostRelevantPlugins(pluginFinder, userPrompt, plugins);
         }
 
@@ -64,8 +67,7 @@ class AbstractAiCopilotTest {
             PluginFinder pluginFinder,
             List<PluginMetadata<VER>> availablePlugins,
             FunctionChecked<List<String>, String> jsonSchemaWithPluginsGenerator,
-            YamlGenerator yamlGenerator
-        ) {
+            YamlGenerator yamlGenerator) {
             return super.generateYaml(
                 originalYaml,
                 userPrompt,
@@ -85,28 +87,31 @@ class AbstractAiCopilotTest {
         String olderVersionDescription = "Old plugin description";
         String newerVersionDescription = "New plugin description";
         String deprecatedPluginType = "io.kestra.libs.DeprecatedPlugin";
-        assertThat(copilot.publicMostRelevantPlugins(
-            (pluginsAsString, prompt) -> {
-                assertThat(prompt).isEqualTo(actualPrompt);
-                assertThat(pluginsAsString).doesNotContain(deprecatedPluginType);
-                assertThat(pluginsAsString).doesNotContain(olderVersionDescription);
-                assertThat(pluginsAsString).contains(newerVersionDescription);
+        assertThat(
+            copilot.publicMostRelevantPlugins(
+                (pluginsAsString, prompt) ->
+                {
+                    assertThat(prompt).isEqualTo(actualPrompt);
+                    assertThat(pluginsAsString).doesNotContain(deprecatedPluginType);
+                    assertThat(pluginsAsString).doesNotContain(olderVersionDescription);
+                    assertThat(pluginsAsString).contains(newerVersionDescription);
 
-                return List.of(
-                    "io.kestra.libs.FakePlugin",
-                    "io.kestra.libs.sub.package.SomePlugin"
-                );
-            },
-            actualPrompt,
-            List.of(
-                new PluginMetadata<>("io.kestra.libs.FakePlugin", "A fake plugin", "tasks", false, 1),
-                new PluginMetadata<>("io.kestra.libs.AnotherPlugin", olderVersionDescription, "tasks", false, 1),
-                new PluginMetadata<>("io.kestra.libs.AnotherPlugin", newerVersionDescription, "tasks", false, 2),
-                new PluginMetadata<>(deprecatedPluginType, "Deprecated plugin", "tasks", true, 2),
-                new PluginMetadata<>("io.kestra.libs.sub.package.SomePlugin", "Some plugin", "tasks", false, 3)
-            ),
-            List.of()
-        )).containsExactly("io.kestra.libs.FakePlugin", "io.kestra.libs.sub.package.SomePlugin");
+                    return List.of(
+                        "io.kestra.libs.FakePlugin",
+                        "io.kestra.libs.sub.package.SomePlugin"
+                    );
+                },
+                actualPrompt,
+                List.of(
+                    new PluginMetadata<>("io.kestra.libs.FakePlugin", "A fake plugin", "tasks", false, 1),
+                    new PluginMetadata<>("io.kestra.libs.AnotherPlugin", olderVersionDescription, "tasks", false, 1),
+                    new PluginMetadata<>("io.kestra.libs.AnotherPlugin", newerVersionDescription, "tasks", false, 2),
+                    new PluginMetadata<>(deprecatedPluginType, "Deprecated plugin", "tasks", true, 2),
+                    new PluginMetadata<>("io.kestra.libs.sub.package.SomePlugin", "Some plugin", "tasks", false, 3)
+                ),
+                List.of()
+            )
+        ).containsExactly("io.kestra.libs.FakePlugin", "io.kestra.libs.sub.package.SomePlugin");
     }
 
     @Test
@@ -163,42 +168,48 @@ class AbstractAiCopilotTest {
     void generateYamlReturnsPossibleErrorMessageThrows() {
         TestAiCopilot copilot = new TestAiCopilot(Object.class);
 
-        assertThatThrownBy(() -> copilot.publicGenerateYaml(
-            """
-                some: yaml""",
-            "user prompt",
-            pluginFinderMock(),
-            Collections.emptyList(),
-            (ignored) -> "{\"type\":\"object\"}",
-            (enhancedPrompt, schemaJson) -> TestAiCopilot.ALREADY_VALID_MESSAGE
-        ))
+        assertThatThrownBy(
+            () -> copilot.publicGenerateYaml(
+                """
+                    some: yaml""",
+                "user prompt",
+                pluginFinderMock(),
+                Collections.emptyList(),
+                (ignored) -> "{\"type\":\"object\"}",
+                (enhancedPrompt, schemaJson) -> TestAiCopilot.ALREADY_VALID_MESSAGE
+            )
+        )
             .isInstanceOf(AiException.class)
             .hasMessage(TestAiCopilot.ALREADY_VALID_MESSAGE);
 
-        assertThat(copilot.publicGenerateYaml(
-            """
-                some: yaml""",
-            "user prompt",
-            pluginFinderMock(),
-            Collections.emptyList(),
-            (ignored) -> "{\"type\":\"object\"}",
-            (enhancedPrompt, schemaJson) -> "Any message"
-        )).isEqualTo("Any message");
+        assertThat(
+            copilot.publicGenerateYaml(
+                """
+                    some: yaml""",
+                "user prompt",
+                pluginFinderMock(),
+                Collections.emptyList(),
+                (ignored) -> "{\"type\":\"object\"}",
+                (enhancedPrompt, schemaJson) -> "Any message"
+            )
+        ).isEqualTo("Any message");
     }
 
     @Test
     void generateYamlAlreadyValidThrows() {
         TestAiCopilot copilot = new TestAiCopilot(Object.class);
 
-        assertThatThrownBy(() -> copilot.publicGenerateYaml(
-            """
-                my: value""",
-            "user prompt",
-            pluginFinderMock(),
-            Collections.emptyList(),
-            (ignored) -> "{\"type\":\"object\"}",
-            (enhancedPrompt, schemaJson) -> "```yaml\nmy: value\n```"
-        ))
+        assertThatThrownBy(
+            () -> copilot.publicGenerateYaml(
+                """
+                    my: value""",
+                "user prompt",
+                pluginFinderMock(),
+                Collections.emptyList(),
+                (ignored) -> "{\"type\":\"object\"}",
+                (enhancedPrompt, schemaJson) -> "```yaml\nmy: value\n```"
+            )
+        )
             .isInstanceOf(AiException.class)
             .hasMessage(copilot.alreadyValidMessage());
     }

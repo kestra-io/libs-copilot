@@ -1,11 +1,12 @@
 package io.kestra.libs.copilot.services.ai;
 
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
-import org.junit.jupiter.api.Assumptions;
-
 import java.time.Duration;
 import java.util.Optional;
+
+import org.junit.jupiter.api.Assumptions;
+
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 
 public class LlmAiCopilotTest {
     private static final String GEMINI_API_KEY = "GEMINI_API_KEY";
