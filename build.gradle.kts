@@ -67,7 +67,9 @@ repositories {
 }
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
+    if (!isBuildSnapshot) {
+        signAllPublications()
+    }
     coordinates("${project.group}", "${project.name}", "${project.version}")
 
     pom {

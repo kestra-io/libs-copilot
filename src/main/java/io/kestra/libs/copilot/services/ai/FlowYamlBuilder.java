@@ -19,14 +19,13 @@ public interface FlowYamlBuilder {
             - If the user asks for troubleshooting, try to fix any related expression or task.
             - If the user current flow seems unrelated, you can discard it and start from scratch, otherwise try to keep what you can from the current Flow while still replying to the user's intent.
             - Identify if the user requests an addition, deletion, or modification of specific tasks, or a full rewrite of their flow. Only modify the relevant part.
-             If the change scope is unclear, discard the initial Flow if it does not fit the user’s needs.
+             If the change scope is unclear, discard the initial Flow if it does not fit the user's needs.
              Avoid duplicating existing intent (e.g., if the Flow logs "hi" and the user wants "hello world", replace the existing message).
             - Use only the types and properties explicitly defined in the above schema. Do not invent, guess, or use properties from other types.
             - If a property is not present in the schema for a given type or you are unsure whether it exists or not DO NOT INCLUDE IT.
             - The type of each property must match the schema exactly.
             - Do not use any types not present in the schema in a given section.
             - Use only double curly brackets surrounded expressions available in the provided examples and schema. Those are pebble expressions.
-            - The following variables are always available in expressions: `flow.id`, `flow.namespace`, `flow.name`, `flow.description`, `execution.id`.
             - Use provided examples to guide property usage and structure. Adapt them as needed; do not copy them verbatim.
             - Some properties accept multiple types (string, array, object). Choose the right type based on the provided examples.
             - Adjust `default` property values to match the user's intent.
@@ -51,6 +50,9 @@ public interface FlowYamlBuilder {
             - If you have any other information to share to the user, add them as comments in the YAML using `#` at the beginning of the raw YAML.
             - Never add raw text in the response
 
+            Available Pebble expressions:
+            {_{pebbleExpressions}_}
+
             IMPORTANT: If the user prompt cannot be fulfilled with the schema, instead of generating a Flow, reply: `{_{flowGenerationError}_}`.
             Do not invent properties or types. Strictly follow the provided schema."""
     )
@@ -60,5 +62,6 @@ public interface FlowYamlBuilder {
         @V("currentFlowYaml") String currentFlowYaml,
         @V("namespace") String namespace,
         @V("tenantId") String tenantId,
+        @V("pebbleExpressions") String pebbleExpressions,
         @UserMessage String userPrompt);
 }
