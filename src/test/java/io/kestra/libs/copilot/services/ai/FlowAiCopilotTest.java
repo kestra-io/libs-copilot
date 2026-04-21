@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class FlowAiCopilotTest extends LlmAiCopilotTest {
@@ -44,6 +45,7 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
                 eq(initialFlow),
                 eq("company.team"),
                 eq("tenant-1"),
+                eq("Filters: filter1, filter2\nFunctions: fn1(), fn2(arg)"),
                 eq(
                     String.format(
                         "Current Object YAML:\n```yaml\n%s\n```\n\nUser's prompt:\n```\n%s\n```",
@@ -63,10 +65,34 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
             },
             List.of(new PluginMetadata<>("io.kestra.plugin.core.log.Log", "Emit log entries", "tasks", false, 1)),
             new FlowGenerationPrompt("conversation-1", "Add a log task", initialFlow, "company.team"),
-            "tenant-1"
+            "tenant-1",
+            "Filters: filter1, filter2\nFunctions: fn1(), fn2(arg)"
         );
 
         assertThat(yaml).isEqualTo("id: generated");
+    }
+
+    @Test
+    void generateFlowCoercesNullPebbleExpressionsToEmptyString() {
+        PluginFinder pluginFinder = mock(PluginFinder.class);
+        when(pluginFinder.findPlugins(anyString(), anyString())).thenReturn(List.of("io.kestra.plugin.core.log.Log"));
+
+        FlowYamlBuilder flowYamlBuilder = mock(FlowYamlBuilder.class);
+        when(flowYamlBuilder.buildFlow(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+            .thenReturn("id: generated");
+
+        new TestFlowAiCopilot().generateFlow(
+            pluginFinder,
+            flowYamlBuilder,
+            (ignoredPlugins) -> "{\"type\":\"object\"}",
+            List.of(new PluginMetadata<>("io.kestra.plugin.core.log.Log", "Emit log entries", "tasks", false, 1)),
+            new FlowGenerationPrompt("conversation-null-pebble", "Create a flow", null, "company.team"),
+            "tenant-1",
+            null
+        );
+
+        // null must be coerced to "" — Langchain4j throws IllegalArgumentException on null @V values
+        verify(flowYamlBuilder).buildFlow(anyString(), anyString(), anyString(), anyString(), anyString(), eq(""), anyString());
     }
 
     @Test
@@ -101,7 +127,8 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
                 null,
                 "company.team"
             ),
-            "my_tenant"
+            "my_tenant",
+            ""
         );
 
         JsonNode parsedYaml = JacksonMapper.ofYaml().readTree(yaml);

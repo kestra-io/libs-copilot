@@ -1,6 +1,7 @@
 package io.kestra.libs.copilot.services.ai;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import io.kestra.libs.copilot.models.in.FlowGenerationPrompt;
@@ -61,14 +62,18 @@ public class FlowAiCopilot<F> extends AbstractAiCopilot<F> {
 
     public <V extends Comparable<V>> String generateFlow(PluginFinder pluginFinder, FlowYamlBuilder flowYamlBuilder,
         FunctionChecked<List<String>, String> jsonSchemaWithPluginsGenerator, List<PluginMetadata<V>> plugins,
-        FlowGenerationPrompt flowGenerationPrompt, String tenantId) {
+        FlowGenerationPrompt flowGenerationPrompt, String tenantId,
+        String pebbleExpressions) {
+        // Langchain4j throws IllegalArgumentException when a @V template variable is null.
+        String safePebbleExpressions = Objects.requireNonNullElse(pebbleExpressions, "");
         return generateYaml(
             flowGenerationPrompt.getYaml(), flowGenerationPrompt.getUserPrompt(), pluginFinder, plugins,
             jsonSchemaWithPluginsGenerator,
             (enhancedPrompt, schemaJson) -> flowYamlBuilder.buildFlow(
                 schemaJson, badRequestMessage(),
                 Optional.ofNullable(flowGenerationPrompt.getYaml()).orElse(""),
-                flowGenerationPrompt.getNamespace(), tenantId, enhancedPrompt
+                flowGenerationPrompt.getNamespace(), tenantId,
+                safePebbleExpressions, enhancedPrompt
             )
         );
     }
