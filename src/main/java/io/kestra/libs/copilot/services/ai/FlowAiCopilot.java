@@ -66,13 +66,14 @@ public class FlowAiCopilot<F> extends AbstractAiCopilot<F> {
         String pebbleExpressions) {
         // Langchain4j throws IllegalArgumentException when a @V template variable is null.
         String safePebbleExpressions = Objects.requireNonNullElse(pebbleExpressions, "");
+        String safeTenantId = Objects.requireNonNullElse(tenantId, "");
         return generateYaml(
             flowGenerationPrompt.getYaml(), flowGenerationPrompt.getUserPrompt(), pluginFinder, plugins,
             jsonSchemaWithPluginsGenerator,
             (enhancedPrompt, schemaJson) -> flowYamlBuilder.buildFlow(
                 schemaJson, badRequestMessage(),
                 Optional.ofNullable(flowGenerationPrompt.getYaml()).orElse(""),
-                flowGenerationPrompt.getNamespace(), tenantId,
+                flowGenerationPrompt.getNamespace(), safeTenantId,
                 safePebbleExpressions, enhancedPrompt
             )
         );
