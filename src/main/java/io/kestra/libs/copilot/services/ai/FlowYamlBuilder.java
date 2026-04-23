@@ -12,7 +12,11 @@ public interface FlowYamlBuilder {
             {_{flowSchema}_}
             ```
 
-            Before generating YAML, if namespace is provided and the tool exists, you can call getPluginDefaults({_{tenantId}_},{_{namespace}_}) and use the returned plugin defaults to decide which task properties to omit. Respect `forced: true` defaults which override task values at runtime.
+            Request context — use these exact values for every tool call:
+            - namespace: "{_{namespace}_}"
+            - tenantId: "{_{tenantId}_}"
+
+            Before generating YAML, if namespace is provided and the tool exists, you can call getPluginDefaults("{_{namespace}_}", "{_{tenantId}_}") and use the returned plugin defaults to decide which task properties to omit. Respect `forced: true` defaults which override task values at runtime.
 
             Here are the rules:
             - Use examples, properties, and outputs only as specified in the schema.
@@ -52,6 +56,11 @@ public interface FlowYamlBuilder {
 
             Available Pebble expressions:
             {_{pebbleExpressions}_}
+
+            Expression usage rules (strict — do not deviate):
+            - When calling any pebble function, prefer the POSITIONAL single-quoted form as shown in the examples under KV_PAIRS / SECRETS (e.g. {{ kv('my_key') }}, {{ secret('MY_SECRET') }}, {{ kv('my_key', 'another.ns') }}). The `fn(paramA=..., paramB=...)` entries under FUNCTIONS are signature templates describing parameter order, not call syntax — do not mimic them verbatim. Named arguments are acceptable only when you need to skip an intermediate optional parameter that cannot be expressed positionally (e.g. {{ kv('my_key', errorOnMissing=false) }} skips `namespace`, {{ secret('MY_SECRET', subkey='password') }} skips `namespace`).
+            - Task output references MUST match exactly one of the dotted paths listed under TASK_OUTPUTS. Access properties directly as {{ outputs.<taskId>.<prop> }}. Do NOT chain additional segments that are not in the TASK_OUTPUTS list — for example, if TASK_OUTPUTS lists outputs.http_call.code and outputs.http_call.body, write {{ outputs.http_call.code }}, never {{ outputs.http_call.body.code }}.
+            - Prefer underscores over hyphens in task IDs (e.g., `http_call` not `http-call`). If a task ID already contains a hyphen or other non-alphanumeric characters (except underscore), ALWAYS use bracket notation when referencing it in expressions: `{{ outputs['task-id'].prop }}`. Dot notation with a hyphenated ID is a Pebble parse error because `-` is treated as subtraction.
 
             IMPORTANT: If the user prompt cannot be fulfilled with the schema, instead of generating a Flow, reply: `{_{flowGenerationError}_}`.
             Do not invent properties or types. Strictly follow the provided schema."""
