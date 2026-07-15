@@ -6,7 +6,7 @@ junit-jupiter = "5.13.4"
 jakarta = "3.1.1"
 assertj = "3.27.7"
 mockito = "5.20.0"
-jackson = "2.19.2"
+jackson = "2.22.1"
 langchain4j = "1.11.0"
 
 [libraries]
