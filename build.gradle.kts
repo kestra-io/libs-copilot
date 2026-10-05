@@ -75,7 +75,7 @@ mavenPublishing {
     pom {
         name.set(project.name)
         description.set("${project.group}:${project.name}:${rootProject.version}")
-        url.set("https://github.com/kestra-io/${rootProject.name}")
+        url.set("https://github.com/kestra-io/libs-copilot")
 
         licenses {
             license {
@@ -92,7 +92,7 @@ mavenPublishing {
         }
         scm {
             connection.set("scm:git:")
-            url.set("https://github.com/kestra-io/${rootProject.name}")
+            url.set("https://github.com/kestra-io/libs-copilot")
         }
     }
 }
