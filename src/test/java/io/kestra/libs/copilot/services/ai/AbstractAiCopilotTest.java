@@ -214,6 +214,65 @@ class AbstractAiCopilotTest {
             .hasMessage(copilot.alreadyValidMessage());
     }
 
+    @Test
+    void shouldPropagateProviderErrorWhenPluginFinderFails() {
+        TestAiCopilot copilot = new TestAiCopilot(Object.class);
+        PluginFinder pluginFinder = mock(PluginFinder.class);
+        RuntimeException providerError = new RuntimeException("You exceeded your current quota (insufficient_quota)");
+        when(pluginFinder.findPlugins(anyString(), anyString())).thenThrow(providerError);
+
+        assertThatThrownBy(
+            () -> copilot.publicGenerateYaml(
+                null,
+                "user prompt",
+                pluginFinder,
+                Collections.emptyList(),
+                (ignored) -> "{\"type\":\"object\"}",
+                (enhancedPrompt, schemaJson) -> "a: 1"
+            )
+        ).isSameAs(providerError);
+    }
+
+    @Test
+    void shouldReportUnableToGenerateWhenNoPluginIsRelevant() {
+        TestAiCopilot copilot = new TestAiCopilot(Object.class);
+        PluginFinder pluginFinder = mock(PluginFinder.class);
+        when(pluginFinder.findPlugins(anyString(), anyString())).thenReturn(List.of());
+
+        assertThatThrownBy(
+            () -> copilot.publicGenerateYaml(
+                null,
+                "user prompt",
+                pluginFinder,
+                Collections.emptyList(),
+                (ignored) -> "{\"type\":\"object\"}",
+                (enhancedPrompt, schemaJson) -> "a: 1"
+            )
+        )
+            .isInstanceOf(AiException.class)
+            .hasMessage(TestAiCopilot.UNABLE_TO_GENERATE_ERROR);
+    }
+
+    @Test
+    void shouldReportBadRequestWhenSchemaGenerationFails() {
+        TestAiCopilot copilot = new TestAiCopilot(Object.class);
+
+        assertThatThrownBy(
+            () -> copilot.publicGenerateYaml(
+                null,
+                "user prompt",
+                pluginFinderMock(),
+                Collections.emptyList(),
+                (ignored) -> {
+                    throw new IllegalArgumentException("Unknown plugin type");
+                },
+                (enhancedPrompt, schemaJson) -> "a: 1"
+            )
+        )
+            .isInstanceOf(AiException.class)
+            .hasMessage(TestAiCopilot.NON_REQUEST_ERROR);
+    }
+
     private PluginFinder pluginFinderMock() {
         PluginFinder mock = mock(PluginFinder.class);
         Mockito.doReturn(List.of("placeholder.Task")).when(mock).findPlugins(anyString(), anyString());

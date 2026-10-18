@@ -106,12 +106,12 @@ public abstract class AbstractAiCopilot<T> {
             "Current " + clazz.getSimpleName() + " YAML:\n```yaml\n%s\n```\n\nUser's prompt:\n```\n%s\n```",
             Optional.ofNullable(originalYaml).orElse(""), userPrompt
         );
+        // Kept outside the try: a provider failure (quota, auth, network) or the "not enough information"
+        // AiException must reach the caller as-is instead of being reported as an off-topic prompt.
+        List<String> relevantPlugins = mostRelevantPlugins(pluginFinder, enhancedPrompt, availablePlugins);
         String minifiedSchemaForPlugins;
         try {
-            minifiedSchemaForPlugins = minifySchema(
-                jsonSchemaWithPluginsGenerator
-                    .apply(mostRelevantPlugins(pluginFinder, enhancedPrompt, availablePlugins))
-            );
+            minifiedSchemaForPlugins = minifySchema(jsonSchemaWithPluginsGenerator.apply(relevantPlugins));
         } catch (Exception e) {
             throw new AiException(this.badRequestMessage());
         }
