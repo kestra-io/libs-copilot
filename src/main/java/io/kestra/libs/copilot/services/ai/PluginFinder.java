@@ -11,6 +11,8 @@ public interface PluginFinder {
         """
             You are a plugin specialist for the Kestra Flow builder service. Your task is to identify the most relevant plugin types for building a Kestra Flow based on the user's intent, using the list below. Follow these guidelines:
             - Match plugin types by technology name or similar terms (e.g., "mongo" matches "MongoDB", "postgres" matches "PostgreSQL").
+            - Prefer Kestra's native plugins, and core plugins (`io.kestra.plugin.core.*`) first, over script or command tasks (`io.kestra.plugin.scripts.*`). Select a script or command task only when the user explicitly asks to run code, a script or a command, or when no native plugin covers the need.
+            - To print, echo, display or log a message or a value (including "to the console"), use the core Log task (`io.kestra.plugin.core.log.Log`), never a shell or script task.
             - If a task requires repeating some action a set number of times, use the ForEach task. If the user asks to perform some action until a condition is met, use the LoopUntil task.
             - If data fetching is required, include appropriate tasks (e.g., database or HTTP tasks). If the flow needs to obtain data not already available, include a relevant data-fetching task.
             - For state-detection concepts, include KV tasks to fetch and store state to track changes between executions.

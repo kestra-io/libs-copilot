@@ -110,6 +110,25 @@ class FlowAiCopilotTest extends LlmAiCopilotTest {
 
     @Test
     @Tag("llm")
+    void shouldSelectLogTaskWhenAskedToPrintToConsole() {
+        PluginFinder pluginFinder = AiServices.create(PluginFinder.class, realChatModel());
+
+        List<String> plugins = pluginFinder.findPlugins(
+            """
+                [{"type":"io.kestra.plugin.scripts.shell.Commands","description":"Execute Shell commands and files"},
+                {"type":"io.kestra.plugin.scripts.shell.Script","description":"Execute a Shell script inline with your Flow Code"},
+                {"type":"io.kestra.plugin.scripts.python.Script","description":"Run inline Python script"},
+                {"type":"io.kestra.plugin.core.http.Request","description":"Make an HTTP API request to a specified URL and store the response as an output."},
+                {"type":"io.kestra.plugin.core.log.Log","description":"Emit log entries from a flow."}]""",
+            "Current Flow YAML:\n```yaml\n\n```\n\nUser's prompt:\n```\nCreate a new flow that prints \"Hello world\" to the console in the `kestra.products` namespace.\n```"
+        );
+
+        assertThat(plugins).contains("io.kestra.plugin.core.log.Log");
+        assertThat(plugins).noneMatch(type -> type.startsWith("io.kestra.plugin.scripts."));
+    }
+
+    @Test
+    @Tag("llm")
     void sanityCheckGenerateFlowWithRealLlm() throws Exception {
         ChatModel model = realChatModel();
 
