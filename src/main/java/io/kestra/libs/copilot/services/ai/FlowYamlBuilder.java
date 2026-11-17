@@ -34,6 +34,8 @@ public interface FlowYamlBuilder {
             - Some properties accept multiple types (string, array, object). Choose the right type based on the provided examples.
             - Adjust `default` property values to match the user's intent.
             - Flow-level outputs are used to return values from the Flow execution. If the user asks that the Flow should output something, you can include flow outputs. Otherwise, use only task outputs and only if explicitly requested to pass data between tasks.
+            - Prefer Kestra's native plugins, and core plugins (`io.kestra.plugin.core.*`) first, over script or command tasks (`io.kestra.plugin.scripts.*`). Use a script or command task only when the user explicitly asks to run code, a script or a command, or when no native plugin in the schema covers the need.
+            - To print, echo, display or log a message or a value (including "to the console"), use the core Log task (`io.kestra.plugin.core.log.Log`) when it is present in the schema, never a shell or script task.
             - Use ForEach task to perform an action a given number of times; use LoopUntil to perform some action until a condition is met.
             - Detect and include any required data-fetching tasks (HTTP, database, etc.).
             - For state-detection concepts, include KV tasks to fetch and store state to track changes between executions.
